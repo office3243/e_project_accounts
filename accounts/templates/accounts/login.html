@@ -1,0 +1,25 @@
+{% extends 'accounts/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+
+    <h2>Log in | Eway Print</h2>
+
+    <div class="container col-lg-4">
+        <form method="post">
+            {% csrf_token %}
+
+
+            {{ form|crispy }}
+
+
+            <input class="btn btn-info" value="Login" type="submit"/>
+        </form>
+
+        <p>Create new account ! <a href="{% url 'accounts:register' %}">Sign Up</a></p>
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    {% block full_title %}<title>{% block title %}Base{% endblock %} | Eway Print</title>{% endblock %}
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-formhelpers/2.3.0/css/bootstrap-formhelpers.css">
+
+
+</head>
+<body>
+{% if messages %}
+    {% for meesage in messages %}
+        <span class="alert  alert-{{ meesage.tags }}">{{ meesage }}</span>
+    {% endfor %}
+{% endif %}
+    <div class="container jumbotron text-center">
+
+        {% block body %}
+
+        {% endblock %}
+
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-formhelpers/2.3.0/js/bootstrap-formhelpers.min.js"></script>
+
+</body>
+</html>
