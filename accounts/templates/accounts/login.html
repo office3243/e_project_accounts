@@ -18,7 +18,8 @@
             <input class="btn btn-info" value="Login" type="submit"/>
         </form>
 
-        <p>Create new account ! <a href="{% url 'accounts:register' %}">Sign Up</a></p>
+        <p>Create new account ! <a href="{% url 'accounts:register' %}">Register</a></p>
+        <a href="{% url 'accounts:password_reset' %}" class="text-danger">Forgot Password?</a>
 
     </div>
 

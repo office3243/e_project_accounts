@@ -2,13 +2,24 @@ from django.conf.urls import url
 from django.contrib.auth.views import LoginView, LogoutView
 from . import views
 from .forms import CustomLoginForm
+from django.views.generic import TemplateView
 
 
 app_name = "accounts"
 
 urlpatterns = [
+
+    url(r'^$', TemplateView.as_view(template_name='accounts/home.html'), name="home"),
+
     url(r"^register/$", views.RegisterView.as_view(), name='register'),
     url(r"^otp_verify/$", views.otp_verify, name='otp_verify'),
+
+    url(r"^password/change/$", views.password_change, name='password_change'),
+
+    url(r"^password/reset/$", views.PasswordResetView.as_view(), name='password_reset'),
+
+    url(r"^password/reset/new/$", views.PasswordResetNewView.as_view(), name='password_reset_new'),
+
 
     url(r'^login/$', LoginView.as_view(template_name='accounts/login.html', authentication_form=CustomLoginForm),
         name='login'),
