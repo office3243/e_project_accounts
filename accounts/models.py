@@ -75,6 +75,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.save()
 
     def otp_generate(self, request):
+        if hasattr(self, 'usersession'):
+            self.usersession.delete()
         user_session = UserSession.objects.create(user=self)
         request.session["user_session_uuid"] = str(user_session.uuid)
         send_otp_2fa(request, self.phone)
@@ -82,6 +84,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         return redirect("accounts:otp_verify")
 
     def password_reset_otp_generate(self, request):
+        if hasattr(self, 'usersession'):
+            self.usersession.delete()
         user_session = UserSession.objects.create(user=self)
         request.session["user_session_uuid"] = str(user_session.uuid)
         send_otp_2fa(request, self.phone)

@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from . import alert_messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
 
 USER_MODEL = get_user_model()
 api_key = settings.API_KEY_2FA
@@ -34,8 +35,19 @@ class RegisterView(FormView):
 
 
 def otp_resend(request):
-    user = UserSession.objects.get(uuid=request.session.get("user_session_uuid"))
-    return user.otp_generate(request)
+    try:
+        user = UserSession.objects.get(uuid=request.session.get("user_session_uuid")).user
+        return user.otp_generate(request)
+    except UserSession.DoesNotExist:
+        raise Http404("Bad Request")
+
+
+def password_reset_otp_resend(request):
+    try:
+        user = UserSession.objects.get(uuid=request.session.get("user_session_uuid")).user
+        return user.password_reset_otp_generate(request)
+    except UserSession.DoesNotExist:
+        raise Http404("Bad Request")
 
 
 class OTPVerifyView(FormView):
