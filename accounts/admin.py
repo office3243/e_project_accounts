@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import OtpSession, User
+from .models import UserSession, User
 
 admin.site.register(User)
-admin.site.register(OtpSession)
+admin.site.register(UserSession)

@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 import requests
-from .models import OtpSession
+from .models import UserSession
 from .forms import RegisterForm
 from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -25,18 +25,18 @@ class RegisterView(FormView):
 def otp_verify(request):
     if request.method == "POST":
         user_otp = request.POST['otp']
-        url = "http://2factor.in/API/V1/{0}/SMS/VERIFY/{1}/{2}".format(api_key, request.session['otp_session_data'], user_otp)
+        url = "http://2factor.in/API/V1/{0}/SMS/VERIFY/{1}/{2}".format(api_key, request.session['user_session_data'], user_otp)
         response = requests.request("GET", url)
         data = response.json()
-        otp_session = OtpSession.objects.get(uuid=request.session["otp_session_uuid"])
-        user = otp_session.user
+        user_session = UserSession.objects.get(uuid=request.session["user_session_uuid"])
+        user = user_session.user
         if data['Status'] == "Success":
             user.is_active = True
             user.phone_verified = True
             user.save()
-            del request.session['otp_session_uuid']
-            del request.session['otp_session_data']
-            otp_session.delete()
+            del request.session['user_session_uuid']
+            del request.session['user_session_data']
+            user_session.delete()
             return HttpResponse("Sucess Verified {}".format(user.phone))
         else:
             messages.warning(request, "please enter correct OTP!")
@@ -50,17 +50,17 @@ def otp_verify(request):
 # def otp_input(request):
 #     if request.method == "POST":
 #         user_otp = request.POST['otp']
-#         url = "http://2factor.in/API/V1/{0}/SMS/VERIFY/{1}/{2}".format(api_key, request.session['otp_session_data'], user_otp)
+#         url = "http://2factor.in/API/V1/{0}/SMS/VERIFY/{1}/{2}".format(api_key, request.session['user_session_data'], user_otp)
 #         response = requests.request("GET", url)
 #         data = response.json()
-#         otp_session = OtpSession.objects.get(uuid=request.session["otp_session_uuid"])
-#         user = otp_session.user
+#         user_session = UserSession.objects.get(uuid=request.session["user_session_uuid"])
+#         user = user_session.user
 #         if data['Status'] == "Success":
 #             user.is_active = True
 #             user.save()
-#             del request.session['otp_session_uuid']
-#             del request.session['otp_session_data']
-#             otp_session.delete()
+#             del request.session['user_session_uuid']
+#             del request.session['user_session_data']
+#             user_session.delete()
 #             return HttpResponse("Sucess Verified {}".format(user.username))
 #         else:
 #             messages.warning(request, "please enter correct OTP!")
@@ -82,9 +82,9 @@ def otp_verify(request):
 #             url = "http://2factor.in/API/V1/{api_key}/SMS/{phone}/AUTOGEN/OTPSEND".format(api_key=api_key, phone=phone)
 #             response = requests.request("GET", url)
 #             data = response.json()
-#             request.session['otp_session_data'] = data['Details']
-#             hash_token = OtpSession.objects.create(user=user)
-#             request.session["otp_session_uuid"] = str(hash_token.uuid)
+#             request.session['user_session_data'] = data['Details']
+#             hash_token = UserSession.objects.create(user=user)
+#             request.session["user_session_uuid"] = str(hash_token.uuid)
 #             return redirect("accounts:otp_input")
 #
 #     else:

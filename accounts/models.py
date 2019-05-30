@@ -57,16 +57,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.wallet
 
     def otp_generate(self, request):
-        hash_token = OtpSession.objects.create(user=self)
-        request.session["otp_session_uuid"] = str(hash_token.uuid)
+        hash_token = UserSession.objects.create(user=self)
+        request.session["user_session_uuid"] = str(hash_token.uuid)
         url = "http://2factor.in/API/V1/{api_key}/SMS/{phone}/AUTOGEN/OTPSEND".format(api_key=api_key_2fa, phone=self.phone)
         response = requests.request("GET", url)
         data = response.json()
-        request.session['otp_session_data'] = data['Details']
+        request.session['user_session_data'] = data['Details']
         return redirect("accounts:otp_verify")
 
 
-class OtpSession(models.Model):
+class UserSession(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
 
