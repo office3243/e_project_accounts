@@ -10,8 +10,21 @@ from .validators import phone_number_validator
 from django.conf import settings
 import requests
 from django.shortcuts import redirect
+from django.contrib import messages
+from . import alert_messages
+
 
 api_key_2fa = settings.API_KEY_2FA
+
+
+def send_otp_2fa(request, phone):
+    if 'user_session_data' in request.session:
+        del request.session['user_session_data']
+    url = "http://2factor.in/API/V1/{api_key}/SMS/{phone}/AUTOGEN/OTPSEND".format(api_key=api_key_2fa, phone=phone)
+    response = requests.request("GET", url)
+    data = response.json()
+    request.session['user_session_data'] = data['Details']
+    return True
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -56,18 +69,28 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_wallet(self):
         return self.wallet
 
+    def make_phone_verified_and_active(self):
+        self.is_active = True
+        self.phone_verified = True
+        self.save()
+
     def otp_generate(self, request):
-        hash_token = UserSession.objects.create(user=self)
-        request.session["user_session_uuid"] = str(hash_token.uuid)
-        url = "http://2factor.in/API/V1/{api_key}/SMS/{phone}/AUTOGEN/OTPSEND".format(api_key=api_key_2fa, phone=self.phone)
-        response = requests.request("GET", url)
-        data = response.json()
-        request.session['user_session_data'] = data['Details']
+        user_session = UserSession.objects.create(user=self)
+        request.session["user_session_uuid"] = str(user_session.uuid)
+        send_otp_2fa(request, self.phone)
+        messages.info(request, alert_messages.REGISTERATION_OTP_SENT_MESSAGE)
         return redirect("accounts:otp_verify")
+
+    def password_reset_otp_generate(self, request):
+        user_session = UserSession.objects.create(user=self)
+        request.session["user_session_uuid"] = str(user_session.uuid)
+        send_otp_2fa(request, self.phone)
+        messages.info(request, alert_messages.PASSWORD_RESET_OTP_SENT_MESSAGE)
+        return redirect("accounts:password_reset_new")
 
 
 class UserSession(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
 
     def __str__(self):
